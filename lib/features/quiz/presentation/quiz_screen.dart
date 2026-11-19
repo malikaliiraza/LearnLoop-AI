@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../notes/data/models/study_note.dart';
 import '../data/models/quiz_question.dart';
 import '../domain/quiz_generator.dart';
 import '../../tutor/domain/ai_tutor.dart';
+import '../../review/data/repositories/review_repository.dart';
 import '../../review/domain/spaced_repetition.dart';
 
 /// One question at a time. Tapping an option reveals whether it was right
-/// and the tutor's re-explanation; "Next" moves on. At the end, the score
-/// is shown and missed topics are scheduled for spaced review.
+/// and the tutor's re-explanation — which names the answer actually picked
+/// when it was wrong; "Next" moves on. At the end, the score is shown and
+/// every answered topic is saved to the spaced-review schedule on the
+/// device (right answers move further out, wrong ones come back tomorrow).
 class QuizScreen extends StatefulWidget {
-  const QuizScreen({super.key, required this.note});
+  const QuizScreen({super.key, required this.note, this.topic});
 
   final StudyNote note;
+
+  /// When set, the quiz covers this topic only (a due-review quiz).
+  final String? topic;
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -25,12 +32,17 @@ class _QuizScreenState extends State<QuizScreen> {
   int _score = 0;
   bool _finished = false;
   final List<String> _missedTopics = [];
+  final Map<String, bool> _results = {};
+  bool _reviewsSaved = false;
   TutorLanguage _language = TutorLanguage.english;
 
   @override
   void initState() {
     super.initState();
-    _questions = QuizGenerator().generateQuiz(widget.note);
+    final generator = QuizGenerator();
+    _questions = widget.topic == null
+        ? generator.generateQuiz(widget.note)
+        : generator.generateQuizForTopic(widget.note, widget.topic!);
   }
 
   QuizQuestion get _current => _questions[_index];
@@ -40,6 +52,7 @@ class _QuizScreenState extends State<QuizScreen> {
     final correct = _current.isCorrect(selected);
     setState(() {
       _selected = selected;
+      _results[_current.topic] = correct;
       if (correct) {
         _score += 1;
       } else {
@@ -57,6 +70,18 @@ class _QuizScreenState extends State<QuizScreen> {
         _selected = null;
       }
     });
+    if (_finished) _saveReviews();
+  }
+
+  /// Persists the SM-2 schedule for every answered topic: right answers
+  /// reschedule further out, wrong ones come back tomorrow.
+  Future<void> _saveReviews() async {
+    final prefs = await SharedPreferences.getInstance();
+    final repository = ReviewRepository(prefs);
+    for (final entry in _results.entries) {
+      await repository.recordAnswer(entry.key, entry.value ? 4 : 2);
+    }
+    if (mounted) setState(() => _reviewsSaved = true);
   }
 
   @override
@@ -133,7 +158,13 @@ class _QuizScreenState extends State<QuizScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  tutor.explain(_current, wasCorrect: _current.isCorrect(_selected!)),
+                  tutor.explain(
+                    _current,
+                    wasCorrect: _current.isCorrect(_selected!),
+                    chosenAnswer: _current.isCorrect(_selected!)
+                        ? null
+                        : _current.options[_selected!],
+                  ),
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
@@ -207,6 +238,15 @@ class _QuizScreenState extends State<QuizScreen> {
             const SizedBox(height: 8),
             Text(
               'Next review: ${nextReview.day}/${nextReview.month}/${nextReview.year}',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          if (_reviewsSaved) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Review schedule saved on this device — missed topics will '
+              'appear under “Due for review” on the home screen.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall,
             ),
