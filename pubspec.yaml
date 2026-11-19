@@ -1,13 +1,15 @@
 name: learnloop_ai
 description: "LearnLoop AI — quizzes from your own notes: an AI tutor that re-explains wrong answers in simple Urdu or English, with spaced repetition."
 publish_to: 'none'
-version: 0.1.0+1
+version: 0.2.0+2
 
 environment:
   sdk: ^3.0.0
   flutter: ">=3.0.0"
 
 dependencies:
+  archive: ^4.7.1
+  file_picker: ^13.4.0
   flutter:
     sdk: flutter
   shared_preferences: ^2.2.2
