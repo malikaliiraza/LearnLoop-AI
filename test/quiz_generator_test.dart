@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:learnloop_ai/features/notes/data/models/study_note.dart';
+import 'package:learnloop_ai/features/quiz/data/models/quiz_question.dart';
 import 'package:learnloop_ai/features/quiz/domain/quiz_generator.dart';
 
 void main() {
@@ -55,6 +56,35 @@ void main() {
       expect(
         a.map((q) => q.question).toList(),
         b.map((q) => q.question).toList(),
+      );
+    });
+
+    test('mixes fill-in-the-blank questions into the quiz', () {
+      final questions =
+          QuizGenerator(randomSeed: 42).generateQuiz(note(), questionCount: 5);
+      final blanks = questions.where(
+          (q) => q.kind == QuizQuestionKind.fillInBlank);
+      expect(blanks, isNotEmpty);
+      for (final q in blanks) {
+        expect(q.question, contains('Fill in the blank'));
+        expect(q.question, contains('_____'));
+        expect(q.options, contains(q.topic));
+        expect(q.options.toSet().length, 4);
+      }
+    });
+
+    test('generateQuizForTopic builds questions about that topic only', () {
+      final questions = QuizGenerator(randomSeed: 3)
+          .generateQuizForTopic(note(), 'photosynthesis');
+      expect(questions, isNotEmpty);
+      expect(questions.every((q) => q.topic == 'photosynthesis'), isTrue);
+    });
+
+    test('generateQuizForTopic returns empty for an unknown topic', () {
+      expect(
+        QuizGenerator(randomSeed: 3)
+            .generateQuizForTopic(note(), 'mitochondria'),
+        isEmpty,
       );
     });
   });
