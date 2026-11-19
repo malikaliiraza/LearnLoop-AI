@@ -8,8 +8,9 @@ import '../models/study_note.dart';
 /// Local storage for study notes (SharedPreferences, offline-first).
 ///
 /// v0.1.0 ships with two sample notes so the quiz and tutor can be tried
-/// immediately; the student replaces them with their own notes. PDF import
-/// is on the roadmap — it will feed the same repository.
+/// immediately; the student replaces them with their own notes. v0.2.0
+/// adds real import — pasted text, .txt files, and PDFs feed the same
+/// repository.
 class NoteRepository {
   NoteRepository(this._prefs);
 
@@ -45,6 +46,7 @@ class NoteRepository {
       StudyNote(
         id: 'sample-photosynthesis',
         title: 'Sample: Photosynthesis',
+        source: StudyNoteSource.sample,
         content:
             'Photosynthesis is the process by which green plants make their own food. '
             'Chlorophyll is the green pigment in leaves that captures sunlight. '
@@ -57,6 +59,7 @@ class NoteRepository {
       StudyNote(
         id: 'sample-flutter-widgets',
         title: 'Sample: Flutter Widgets',
+        source: StudyNoteSource.sample,
         content:
             'A widget is the basic building block of a Flutter user interface. '
             'StatelessWidget is a widget that never changes after it is built. '
