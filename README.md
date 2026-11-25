@@ -1,11 +1,14 @@
 # LearnLoop AI
 
-> **v0.2.0** (November 2026). A Flutter app that turns the student's own notes into quizzes: it builds questions from what they wrote, and when an answer is wrong, an AI tutor re-explains the concept in simple Urdu or English instead of just saying "wrong". Missed topics come back on a spaced-repetition schedule, so revision happens before the exam, not the night before.
+> **v0.2.1** (November 2026). A Flutter app that turns the student's own notes into quizzes: it builds questions from what they wrote, and when an answer is wrong, an AI tutor re-explains the concept in simple Urdu or English instead of just saying "wrong". Missed topics come back on a spaced-repetition schedule, so revision happens before the exam, not the night before.
 
 **What makes it different:** most quiz apps ship a fixed question bank. LearnLoop AI quizzes you on *your own* notes — the PDF or pages you are actually studying — and the tutor is the point: a wrong answer triggers a re-explanation in simple language, in English or Roman Urdu, so a student in Pakistan can understand the concept, not just memorise the answer. Spaced repetition (SM-2) then schedules the weak topics to return at the right time.
 
-## What is built now — v0.2.0
+## What is built now — v0.2.1
 
+- **Android platform support (v0.2.1):** the app now builds for Android from a fresh clone (`android/`, package `com.malikaliiraza.learnloop_ai`, display name "LearnLoop AI").
+
+- **Custom launcher icon (v0.2.1):** a deep-indigo icon with a violet loop ring, an amber arrowhead and an open book — matching the app's indigo/violet theme — set as the Android launcher icon (all densities), the web app icons (192/512, plus maskable) and the favicon. The web manifest now carries the app's indigo theme colour instead of the Flutter template defaults.
 - **Real import:** paste notes, import a .txt file, or import a PDF — the PDF's text layer is extracted on-device with a pure-Dart reader (plain and FlateDecode streams, `Tj`/`TJ` operators). A scanned PDF has no text layer and is reported honestly instead of pretending the import worked.
 - **Quiz generator (heuristic, v0.2):** finds the note's key terms (words that repeat) and asks two kinds of question — "what does your note say about this term?" and fill-in-the-blank — using the note's own sentences as answers and distractors. A quiz built from an imported PDF works exactly like one from a typed note. A real AI question generator (LLM, from a PDF or pasted notes) is on the roadmap — the current generator is a transparent heuristic, not AI.
 - **AI tutor (local templates, v0.2):** after each answer, the tutor re-explains the concept in simple English or Roman Urdu — and when an answer is wrong it names the answer the student actually picked and shows what the note says instead. A real LLM tutor that generates fresh explanations is on the roadmap.

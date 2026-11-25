@@ -1,7 +1,7 @@
 name: learnloop_ai
 description: "LearnLoop AI — quizzes from your own notes: an AI tutor that re-explains wrong answers in simple Urdu or English, with spaced repetition."
 publish_to: 'none'
-version: 0.2.0+2
+version: 0.2.1+3
 
 environment:
   sdk: ^3.0.0
